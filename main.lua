@@ -1,7 +1,7 @@
 -- Variables globales
 local sounds = {}
 local patterns = {
-    { 1: Punk Rock
+    { -- 1: Punk Rock
         { kick = true, snare = false, hihat = true }, 
         { kick = false, snare = true, hihat = true },  
         { kick = true, snare = false, hihat = true },  
@@ -77,7 +77,7 @@ local patterns = {
 local currentPattern = 1 
 local step = 1
 local bpm = 120
-local stepDuration = 60 / bpm / 4
+local stepDuration = 60 / bpm / 2
 local elapsedTime = 0
 
 function love.load()
@@ -87,6 +87,7 @@ function love.load()
 end
 
 function love.update(dt)
+    stepDuration = 60 / bpm / 4
     elapsedTime = elapsedTime + dt
     if elapsedTime >= stepDuration then
         elapsedTime = elapsedTime - stepDuration
@@ -116,12 +117,25 @@ end
 
 function love.keypressed(key)
     if key == "space" then
-        currentPattern = currentPattern % #patterns + 1 -- Alternar entre los patrones
+        currentPattern = currentPattern % #patterns + 1
+    end
+    
+    if key == "up" then
+        bpm = bpm + 10
+    end
+    
+    if key == "down" then
+        bpm = bpm - 10 
+        if bpm < 30 then 
+            bpm = 30
+        end
     end
 end
 
 function love.draw()
     love.graphics.print("Patrón actual: " .. currentPattern, 10, 10)
     love.graphics.print("Step: " .. step, 10, 30)
-    love.graphics.print("Presiona 'Espacio' para cambiar el ritmo", 10, 50)
+    love.graphics.print("BPM: " .. bpm, 10, 50)
+    love.graphics.print("Presiona 'Espacio' para cambiar el ritmo", 10, 70)
+    love.graphics.print("Usa las flechas arriba/abajo para cambiar los BPM", 10, 90)
 end
