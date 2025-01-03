@@ -79,6 +79,7 @@ local step = 1
 local bpm = 120
 local stepDuration = 60 / bpm / 2
 local elapsedTime = 0
+local isPaused = false
 
 function love.load()
     sounds.kick = love.audio.newSource("kick.wav", "static")
@@ -87,14 +88,16 @@ function love.load()
 end
 
 function love.update(dt)
-    stepDuration = 60 / bpm / 4
-    elapsedTime = elapsedTime + dt
-    if elapsedTime >= stepDuration then
-        elapsedTime = elapsedTime - stepDuration
-        playStep(step)
-        step = step + 1
-        if step > #patterns[currentPattern] then
-            step = 1
+    if not isPaused then
+        stepDuration = 60 / bpm / 4
+        elapsedTime = elapsedTime + dt
+        if elapsedTime >= stepDuration then
+            elapsedTime = elapsedTime - stepDuration
+            playStep(step)
+            step = step + 1
+            if step > #patterns[currentPattern] then
+                step = 1
+            end
         end
     end
 end
@@ -132,10 +135,19 @@ function love.keypressed(key)
     end
 end
 
+function love.mousepressed(x, y, button)
+    if button == 1 then
+        isPaused = not isPaused
+    end
+end
+
 function love.draw()
     love.graphics.print("Patrón actual: " .. currentPattern, 10, 10)
     love.graphics.print("Step: " .. step, 10, 30)
     love.graphics.print("BPM: " .. bpm, 10, 50)
     love.graphics.print("Presiona 'Espacio' para cambiar el ritmo", 10, 70)
     love.graphics.print("Usa las flechas arriba/abajo para cambiar los BPM", 10, 90)
+    if isPaused then
+        love.graphics.print("Pausado", 10, 110)
+    end
 end
