@@ -2,82 +2,34 @@
 local sounds = {}
 local patterns = {
     { -- 1: Punk Rock
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = true },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = true, hihat = true },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = true, hihat = true },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = true, hihat = true },  
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = false, hihat = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = false, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = false, snare = true, hihat = false },
     },
     { -- 2: Ritmo más lento
-        { kick = true, snare = false, hihat = false }, 
-        { kick = false, snare = true, hihat = false },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = true, hihat = false },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = true, hihat = false },  
-        { kick = true, snare = false, hihat = false },  
-        { kick = false, snare = true, hihat = true },  
-        { kick = true, snare = true, hihat = true },  
-        { kick = false, snare = false, hihat = true },  
-        { kick = false, snare = false, hihat = false }, 
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false }, 
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false }, 
-        { kick = true, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = false, snare = false, hihat = true },
+        { kick = false, snare = true, hihat = true },
+        { kick = false, snare = false, hihat = true },
     },
     { -- 3: Funk
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = true },  
-        { kick = false, snare = false, hihat = true }, 
-        { kick = true, snare = false, hihat = false }, 
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = true }, 
-        { kick = true, snare = false, hihat = false }, 
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false }, 
-        { kick = true, snare = false, hihat = true }, 
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false }, 
-        { kick = true, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = false, snare = true, hihat = true },
+        { kick = false, snare = false, hihat = true },
     },
     { -- 4: Electrónico básico
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false },  
-        { kick = true, snare = false, hihat = true },  
-        { kick = false, snare = false, hihat = true },  
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = false }, 
-        { kick = true, snare = false, hihat = true }, 
-        { kick = false, snare = true, hihat = false }, 
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = true }, 
-        { kick = true, snare = false, hihat = false }, 
-        { kick = false, snare = true, hihat = true }, 
-        { kick = true, snare = true, hihat = true }, 
-        { kick = false, snare = false, hihat = false }, 
-        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true },
+        { kick = false, snare = false, hihat = false },
+        { kick = false, snare = false, hihat = true },
         { kick = false, snare = false, hihat = true },
     }
 }
-local currentPattern = 1 
+local queue = {} -- Cola de patrones
 local step = 1
 local bpm = 120
-local stepDuration = 60 / bpm / 2
+local stepDuration = 60 / bpm / 4
 local elapsedTime = 0
 local isPaused = false
 
@@ -88,64 +40,64 @@ function love.load()
 end
 
 function love.update(dt)
-    if not isPaused then
-        stepDuration = 60 / bpm / 4
+    if not isPaused and #queue > 0 then
         elapsedTime = elapsedTime + dt
         if elapsedTime >= stepDuration then
             elapsedTime = elapsedTime - stepDuration
-            playStep(step)
+            local currentPattern = patterns[queue[1]]
+            playStep(currentPattern[step])
             step = step + 1
-            if step > #patterns[currentPattern] then
+            if step > #currentPattern then
                 step = 1
+                table.remove(queue, 1) -- Eliminar patrón completado
             end
         end
     end
 end
 
-function playStep(step)
-    local currentStep = patterns[currentPattern][step]
-    if currentStep.kick then
+function playStep(stepData)
+    if stepData.kick then
         sounds.kick:stop()
         sounds.kick:play()
     end
-    if currentStep.snare then
+    if stepData.snare then
         sounds.snare:stop()
         sounds.snare:play()
     end
-    if currentStep.hihat then
+    if stepData.hihat then
         sounds.hihat:stop()
         sounds.hihat:play()
     end
 end
 
 function love.keypressed(key)
-    if key == "space" then
-        currentPattern = currentPattern % #patterns + 1
+    if tonumber(key) and patterns[tonumber(key)] then
+        table.insert(queue, tonumber(key)) -- Agregar patrón a la cola
     end
     
     if key == "up" then
         bpm = bpm + 10
+        stepDuration = 60 / bpm / 4
     end
     
     if key == "down" then
-        bpm = bpm - 10 
-        if bpm < 30 then 
-            bpm = 30
-        end
+        bpm = bpm - 10
+        if bpm < 30 then bpm = 30 end
+        stepDuration = 60 / bpm / 4
     end
 end
 
 function love.mousepressed(x, y, button)
     if button == 1 then
-        isPaused = not isPaused
+        isPaused = not isPaused -- Alternar pausa al hacer clic
     end
 end
 
 function love.draw()
-    love.graphics.print("Patrón actual: " .. currentPattern, 10, 10)
+    love.graphics.print("Cola actual: " .. table.concat(queue, ", "), 10, 10)
     love.graphics.print("Step: " .. step, 10, 30)
     love.graphics.print("BPM: " .. bpm, 10, 50)
-    love.graphics.print("Presiona 'Espacio' para cambiar el ritmo", 10, 70)
+    love.graphics.print("Presiona 1-4 para agregar patrones a la cola", 10, 70)
     love.graphics.print("Usa las flechas arriba/abajo para cambiar los BPM", 10, 90)
     if isPaused then
         love.graphics.print("Pausado", 10, 110)
