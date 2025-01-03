@@ -1,26 +1,84 @@
 -- Variables globales
 local sounds = {}
-local pattern = { -- Un patrón de batería de 16 pasos para punk rock
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = false, snare = true, hihat = true },  -- snare hihat
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = false, snare = true, hihat = true },  -- snare hihat
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = false, snare = true, hihat = true },  -- snare hihat
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = true, snare = false, hihat = true },  -- kick hihat
-{ kick = false, snare = true, hihat = true },  -- snare hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-{ kick = false, snare = false, hihat = true },  -- hihat
-
+local patterns = {
+    { 1: Punk Rock
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = true },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = true, hihat = true },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = true, hihat = true },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = true, hihat = true },  
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = false, hihat = true },
+    },
+    { -- 2: Ritmo más lento
+        { kick = true, snare = false, hihat = false }, 
+        { kick = false, snare = true, hihat = false },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = true, hihat = false },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = true, hihat = false },  
+        { kick = true, snare = false, hihat = false },  
+        { kick = false, snare = true, hihat = true },  
+        { kick = true, snare = true, hihat = true },  
+        { kick = false, snare = false, hihat = true },  
+        { kick = false, snare = false, hihat = false }, 
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false }, 
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false }, 
+        { kick = true, snare = true, hihat = true },
+    },
+    { -- 3: Funk
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = true },  
+        { kick = false, snare = false, hihat = true }, 
+        { kick = true, snare = false, hihat = false }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = true }, 
+        { kick = true, snare = false, hihat = false }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false }, 
+        { kick = true, snare = false, hihat = true }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false }, 
+        { kick = true, snare = true, hihat = true },
+    },
+    { -- 4: Electrónico básico
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false },  
+        { kick = true, snare = false, hihat = true },  
+        { kick = false, snare = false, hihat = true },  
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = false }, 
+        { kick = true, snare = false, hihat = true }, 
+        { kick = false, snare = true, hihat = false }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true }, 
+        { kick = true, snare = false, hihat = false }, 
+        { kick = false, snare = true, hihat = true }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = false }, 
+        { kick = true, snare = true, hihat = true }, 
+        { kick = false, snare = false, hihat = true },
+    }
 }
-local step = 1;local bpm = 120;local stepDuration = 60 / bpm / 4
-local elapsedTime = 0;
+local currentPattern = 1 
+local step = 1
+local bpm = 120
+local stepDuration = 60 / bpm / 4
+local elapsedTime = 0
 
 function love.load()
     sounds.kick = love.audio.newSource("kick.wav", "static")
@@ -29,24 +87,22 @@ function love.load()
 end
 
 function love.update(dt)
-    -- Actualizar el temporizador
     elapsedTime = elapsedTime + dt
     if elapsedTime >= stepDuration then
         elapsedTime = elapsedTime - stepDuration
         playStep(step)
         step = step + 1
-        if step > #pattern then
-            step = 1 -- Reiniciar al comienzo del patrón
+        if step > #patterns[currentPattern] then
+            step = 1
         end
     end
 end
 
 function playStep(step)
-    -- Reproducir sonidos según el patrón actual con reinicio para evitar desfases
-    local currentStep = pattern[step]
+    local currentStep = patterns[currentPattern][step]
     if currentStep.kick then
-        sounds.kick:stop() -- Detener sonido anterior
-        sounds.kick:play() -- Reproducir desde el inicio
+        sounds.kick:stop()
+        sounds.kick:play()
     end
     if currentStep.snare then
         sounds.snare:stop()
@@ -58,7 +114,14 @@ function playStep(step)
     end
 end
 
+function love.keypressed(key)
+    if key == "space" then
+        currentPattern = currentPattern % #patterns + 1 -- Alternar entre los patrones
+    end
+end
+
 function love.draw()
-    -- Dibujar información para depurar (opcional)
-    love.graphics.print("Step: " .. step, 10, 10)
+    love.graphics.print("Patrón actual: " .. currentPattern, 10, 10)
+    love.graphics.print("Step: " .. step, 10, 30)
+    love.graphics.print("Presiona 'Espacio' para cambiar el ritmo", 10, 50)
 end
