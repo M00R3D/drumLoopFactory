@@ -19,13 +19,57 @@ local patterns = {
         { kick = false, snare = true, hihat = true },
         { kick = false, snare = false, hihat = true },
     },
-    { -- 4: Electrónico básico
+    { -- 4: Stoner Rock
+        { kick = true, snare = false, hihat = true },
+        { kick = true, snare = true, hihat = false },
+        { kick = false, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = false },
+    },
+    { -- 5: Surf
+        { kick = false, snare = true, hihat = true, crash = true },
+        { kick = true, snare = false, hihat = true },
+        { kick = true, snare = true, hihat = false },
+        { kick = false, snare = true, hihat = true },
+    },
+    { -- 6: Electrónico variado
+        { kick = true, snare = true, hihat = false },
         { kick = false, snare = false, hihat = true },
-        { kick = false, snare = false, hihat = false },
+        { kick = false, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = false },
+        { kick = true, snare = true, hihat = true },
+    },
+    { -- 7: Patrón 8 golpes + crash
+        { kick = true, snare = false, hihat = true ,swing=true,crash=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = false, snare = false, hihat = true ,swing=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = false, snare = true, hihat = true ,swing=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = true, snare = false, hihat = true ,swing=true},
+        { kick = false, snare = true, hihat = true },
+    },
+    { -- 8: Patrón 8 golpes
+        { kick = true, snare = false, hihat = true },
+        { kick = true, snare = false, hihat = false },
         { kick = false, snare = false, hihat = true },
-        { kick = false, snare = false, hihat = true },
-    }
+        { kick = true, snare = false, hihat = false },
+        { kick = false, snare = true, hihat = true },
+        { kick = true, snare = false, hihat = false },
+        { kick = true, snare = false, hihat = true },
+        { kick = false, snare = true, hihat = true },
+    },
+    { -- 9: Patrón 8 golpes swing
+        { kick = true, snare = false, hihat = true ,swing=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = false, snare = false, hihat = true ,swing=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = false, snare = true, hihat = true ,swing=true},
+        { kick = true, snare = false, hihat = false },
+        { kick = true, snare = false, hihat = true ,swing=true},
+        { kick = false, snare = true, hihat = true },
+    },
 }
+
 local queue = {} -- Cola de patrones
 local step = 1
 local bpm = 120
@@ -37,6 +81,8 @@ function love.load()
     sounds.kick = love.audio.newSource("kick.wav", "static")
     sounds.snare = love.audio.newSource("snare.wav", "static")
     sounds.hihat = love.audio.newSource("hihat.wav", "static")
+    sounds.crash = love.audio.newSource("crash.wav", "static")
+    sounds.swing = love.audio.newSource("swing.wav", "static")
 end
 
 function love.update(dt)
@@ -67,6 +113,14 @@ function playStep(stepData)
     if stepData.hihat then
         sounds.hihat:stop()
         sounds.hihat:play()
+    end
+    if stepData.crash then
+        sounds.crash:stop()
+        sounds.crash:play()
+    end
+    if stepData.swing then
+        sounds.swing:stop()
+        sounds.swing:play()
     end
 end
 
